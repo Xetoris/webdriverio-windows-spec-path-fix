@@ -10,7 +10,7 @@ import { objectToEnv } from '../utils.js'
 
 const log = logger('@wdio/config:utils')
 
-export async function loadTypeScriptCompiler (tsConfigPath?: string) {
+export async function loadTypeScriptCompiler(tsConfigPath?: string) {
     /**
      * don't auto compile within worker as it already was spawn with a loader
      */
@@ -36,7 +36,7 @@ export async function loadTypeScriptCompiler (tsConfigPath?: string) {
     }
 }
 
-export function makeRelativeToCWD (files: (string | string[])[] = []): (string | string[])[] {
+export function makeRelativeToCWD(files: (string | string[])[] = []): (string | string[])[] {
     const returnFiles: (string | string[])[] = []
 
     for (const file of files) {
@@ -45,12 +45,19 @@ export function makeRelativeToCWD (files: (string | string[])[] = []): (string |
             continue
         }
 
-        returnFiles.push(file.startsWith('file:///')
-            ? url.fileURLToPath(file)
-            : file.includes('/')
-                ? path.resolve(process.cwd(), file)
-                : file
-        )
+        let filePath = file.startsWith('file:///') ? url.fileURLToPath(file) : file.includes('/') ? path.resolve(process.cwd(), file) : file
+
+        /*
+            Bug fix for Windows OS.
+            `path.resolve()` will convert the cwd() + path to a Windows fully qualified path, which uses '\' character
+            for file separators. This isn't allowed in `glob` package unless you specifically allow it. Let's just handle
+            it ourselves by changing out the character.
+         */
+        if (filePath.includes('\\')) {
+            filePath = filePath.replace(/\\/g, '/')
+        }
+
+        returnFiles.push(filePath)
     }
 
     return returnFiles
