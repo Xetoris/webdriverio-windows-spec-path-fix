@@ -49,9 +49,9 @@ export function makeRelativeToCWD(files: (string | string[])[] = []): (string | 
 
         /*
             Bug fix for Windows OS.
-            `path.resolve()` will convert the cwd() + path to a Windows fully qualified path, which uses '\' character
-            for file separators. This isn't allowed in `glob` package unless you specifically allow it. Let's just handle
-            it ourselves by changing out the character.
+            `path.resolve()` will convert the cwd() + path to a Windows path, which uses '\' separator
+            This isn't allowed in `glob` package (https://www.npmjs.com/package/glob#Usage) unless you use a feature
+            that breaks another behavior in glob. Band-aid patch is for us to fix it before it goes to glob.
          */
         if (filePath.includes('\\')) {
             filePath = filePath.replace(/\\/g, '/')
